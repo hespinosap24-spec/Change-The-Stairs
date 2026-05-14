@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Change the Stairs — Dragon Repeller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+  <!-- =====================================================
+       REPRODUCTOR DE MÚSICA — ESCRITORIO (Vinilo giratorio)
+       Se muestra en esquina inferior izquierda en pantallas grandes
+  ====================================================== -->
+  <div id="music-player-desktop">
+    <div id="vinyl-record" class="paused">
+      <div class="vinyl-grooves"></div>
+      <div class="vinyl-label">CTS</div>
+    </div>
+    <div class="vinyl-controls">
+      <button id="btn-play" title="Play/Pause" aria-label="Reproducir o pausar">▶</button>
+      <div class="vinyl-vol">
+        <button id="btn-vol-down" title="Bajar volumen">−</button>
+        <div id="vinyl-vol-bar">
+          <div id="vinyl-vol-fill" style="height:70%"></div>
+        </div>
+        <button id="btn-vol-up" title="Subir volumen">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       REPRODUCTOR DE MÚSICA — MÓVIL (Barra horizontal)
+       Se muestra en la parte superior en pantallas pequeñas
+  ====================================================== -->
+  <div id="music-player-mobile">
+    <div id="mobile-disc" class="paused">🎵</div>
+    <span class="mobile-track">Valdoria Theme</span>
+    <div class="mobile-controls">
+      <button id="btn-play-m" aria-label="Reproducir o pausar">▶</button>
+      <input type="range" id="vol-slider" min="0" max="100" value="70" aria-label="Volumen">
+    </div>
+  </div>
+
+  <!-- =====================================================
+       PANTALLA DE TÍTULO
+       El jugador elige nombre y dificultad antes de empezar
+  ====================================================== -->
+  <div id="screen-title" class="screen active">
+    <div class="title-inner">
+
+      <div class="title-logo">
+        <p class="logo-eyebrow">— A tale from Valdoria —</p>
+        <h1 class="logo-main">Change<br>the Stairs</h1>
+        <p class="logo-sub">Dragon Repeller</p>
+      </div>
+
+      <div class="title-form">
+        <!-- Nombre del jugador -->
+        <div class="field-group">
+          <label for="input-name">Your name, traveller:</label>
+          <input type="text" id="input-name" placeholder="Enter name…" maxlength="16" autocomplete="off">
+        </div>
+
+        <!-- Selección de dificultad -->
+        <div class="field-group">
+          <label>Choose your fate:</label>
+          <div class="diff-grid">
+            <button class="diff-btn selected" data-diff="easy">
+              <span class="diff-icon">🌱</span>
+              <strong>Explorer</strong>
+              <small>Easier combat, more gold</small>
+            </button>
+            <button type="button" class="diff-btn" data-diff="normal">
+              <span class="diff-icon">⚔️</span>
+              <strong>Adventurer</strong>
+              <small>Balanced experience</small>
+            </button>
+            <button type="button" class="diff-btn" data-diff="hard">
+              <span class="diff-icon">💀</span>
+              <strong>Legend</strong>
+              <small>Brutal. No mercy.</small>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" id="btn-start" class="btn-primary">Begin the Journey</button>
+      </div>
+
+      <p class="title-quote">"Heroes are not those who win.<br>They are those who keep walking."</p>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       PANTALLA PRINCIPAL DEL JUEGO
+  ====================================================== -->
+  <div id="screen-game" class="screen">
+    <div id="game-wrapper">
+
+      <!-- Cabecera: zona actual y nivel de progresión -->
+      <div id="zone-header">
+        <span id="zone-name">Briar Hollow</span>
+        <span id="progress-badge">Stage <span id="stage-num">1</span>/20</span>
+      </div>
+
+      <!-- Área visual: fondo de zona + sprites -->
+      <div id="visual">
+        <img id="heroImage"    src="./images/hero.png"  alt="Hero">
+        <img id="monsterImage" src=""                   alt="Monster" style="display:none">
+      </div>
+
+      <!-- Barra de stats del jugador -->
+      <div id="stats-bar">
+        <div class="stat-group">
+          <span class="stat-lbl">HP</span>
+          <div class="bar-wrap"><div id="playerHealthBar" class="bar bar-hp"></div></div>
+          <span id="healthText" class="stat-val">100</span>
+        </div>
+        <div class="stat-group">
+          <span class="stat-lbl">XP</span>
+          <div class="bar-wrap"><div id="xpBar" class="bar bar-xp"></div></div>
+          <span id="xpText" class="stat-val">0/15</span>
+        </div>
+        <div class="stat-inline">
+          <span class="stat-lbl">⭐</span>
+          <span id="levelText" class="stat-val gold">1</span>
+        </div>
+        <div class="stat-inline">
+          <span class="stat-lbl">💰</span>
+          <span id="goldText" class="stat-val gold">50</span>
+        </div>
+      </div>
+
+      <!-- Stats del monstruo (oculto hasta el combate) -->
+      <div id="monsterStats" style="display:none">
+        <span id="monsterName" class="monster-label">Enemy</span>
+        <div class="stat-group">
+          <span class="stat-lbl">HP</span>
+          <div class="bar-wrap"><div id="monsterHealthBar" class="bar bar-monster"></div></div>
+          <span id="monsterHealthText" class="stat-val">0</span>
+        </div>
+        <!-- Pista de secuencia secreta visible durante el combate -->
+        <span id="secret-hint" class="secret-hint" title="Combat sequence hint"></span>
+      </div>
+
+      <!-- Panel de texto narrativo -->
+      <div id="text-panel">
+        <p id="text">Welcome to Valdoria…</p>
+      </div>
+
+      <!-- Botones de acción (cambian según el contexto) -->
+      <div id="controls">
+        <button id="button1" class="action-btn">Store</button>
+        <button id="button2" class="action-btn">Fight</button>
+        <button id="button3" class="action-btn">Advance</button>
+      </div>
+
+      <!-- Panel de inventario / equipo -->
+      <div id="inv-panel">
+        <div class="inv-header">⚔ EQUIPMENT</div>
+        <div id="inventoryContent"><!-- llenado por JS --></div>
+      </div>
+
+    </div><!-- /game-wrapper -->
+  </div><!-- /screen-game -->
+
+  <!-- Footer -->
+  <footer>
+    <p id="credits-text"></p>
+  </footer>
+
+  <!-- Música de exploración (zonas, hub, tienda) -->
+  <audio id="bgMusic" loop>
+    <source src="./audio/valdoria-theme.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Música de combate (se activa al iniciar pelea) -->
+  <audio id="combatMusic" loop>
+    <source src="./audio/combat-theme.mp3" type="audio/mpeg">
+  </audio>
+
+  <script src="./script.js"></script>
+</body>
+</html>
